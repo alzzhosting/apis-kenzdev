@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran QRIS</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #00eaff;
+            --container-bg: rgba(0, 0, 0, 0.8);
+            --glow-color: rgba(0, 234, 255, 0.8);
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 20px;
+            background: var(--container-bg);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 20px var(--glow-color);
+        }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .qris-image {
+            width: 200px;
+            height: 200px;
+            margin: 20px 0;
+            border: 2px solid var(--text-color);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background: var(--text-color);
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 0 15px var(--glow-color);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .download-link:hover {
+            background: #0099cc;
+            transform: scale(1.1);
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-color);
+            text-shadow: 0 0 5px var(--glow-color);
+        }
+        .clock {
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--glow-color);
+        }
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle, transparent, transparent, rgba(255, 255, 255, 0.1));
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .hide {
+            display: none;
+        }
+        .input-section {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Efek Bintang -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Jam Digital -->
+    <div class="clock" id="clock"></div>
+
+    <div class="container">
+        <h1>Pembayaran QRIS</h1>
+        <p id="instruction-text">Silakan buat QRIS terlebih dahulu untuk melanjutkan pembayaran:</p>
+        
+        <!-- Bagian Input untuk Buat QRIS -->
+        <div class="input-section" id="input-section">
+            <button class="download-link" id="create-qris-button">Buat QRIS</button>
+        </div>
+
+        <!-- QRIS yang Ditampilkan setelah QRIS Dibuat -->
+        <div id="qris-section" class="hide">
+            <p>Silakan scan kode QRIS berikut untuk melakukan pembayaran:</p>
+            <img src="qris.jpg" alt="Kode QRIS" id="qris-image" class="qris-image">
+            <p>ID TRANSAKSI: <strong id="transaction-id"></strong></p>
+            <p>Nama penerima: <strong>Kenz Market</strong></p>
+            <p>DNID: <strong id="dnid"></strong></p>
+            <p>Waktu Kadaluarsa: <strong id="expired-time"></strong></p>
+            <a href="qris2.jpg" download="qris-pembayaran.jpg" class="download-link" id="download-link">💾 Unduh QRIS</a>
+            <div class="footer">© 2025 Kenz Market. Semua hak dilindungi.</div>
+        </div>
+
+        <!-- Tombol Buat QRIS Lagi Setelah Kadaluarsa -->
+        <div id="create-again-section" class="hide">
+            <button class="download-link" id="create-again-button">Buat QRIS Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // ID Transaksi Acak
+        function generateTransactionID() {
+            return 'TRX-' + Math.random().toString(36).substr(2, 10).toUpperCase();
+        }
+
+        // DNID (Digital National ID) Acak
+        function generateDNID() {
+            return 'DN-' + Math.random().toString(36).substr(2, 10).toUpperCase();
+        }
+
+        // Jam Digital
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString();
+            document.getElementById('clock').textContent = time;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Tambahkan Bintang
+        const starsContainer = document.getElementById('stars');
+        const starCount = 200; // Jumlah bintang
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Mengelola QRIS
+        const createQrisButton = document.getElementById('create-qris-button');
+        const qrisSection = document.getElementById('qris-section');
+        const inputSection = document.getElementById('input-section');
+        const downloadLink = document.getElementById('download-link');
+        const qrisImage = document.getElementById('qris-image');
+        const transactionIDElement = document.getElementById('transaction-id');
+        const dnisElement = document.getElementById('dnid');
+        const expiredTimeElement = document.getElementById('expired-time');
+        const instructionText = document.getElementById('instruction-text');
+        const createAgainButton = document.getElementById('create-again-button');
+        const createAgainSection = document.getElementById('create-again-section');
+        
+        let expirationTime;
+        let expirationTimer;
+
+        // Fungsi untuk membuat QRIS Baru
+        function createQris() {
+            const transactionID = generateTransactionID();
+            const dnid = generateDNID();
+            
+            // Sembunyikan instruksi dan tampilkan QRIS
+            instructionText.classList.add('hide');
+            qrisImage.classList.remove('hide');
+            transactionIDElement.textContent = transactionID;
+            dnisElement.textContent = dnid;
+            inputSection.classList.add('hide');
+            qrisSection.classList.remove('hide');
+            
+            // Hitung waktu kadaluarsa (1 menit)
+            expirationTime = new Date().getTime() + 1 * 60 * 1000; // 1 menit
+            updateExpiration();
+            expirationTimer = setInterval(updateExpiration, 1000);
+        }
+
+        // Fungsi untuk menghitung sisa waktu kadaluarsa QRIS
+        function updateExpiration() {
+            const now = new Date().getTime();
+            const remainingTime = expirationTime - now;
+
+            if (remainingTime <= 0) {
+                expiredTimeElement.textContent = "QRIS ini telah kadaluarsa.";
+                qrisImage.classList.add('hide');
+                downloadLink.classList.add('hide');
+                createAgainSection.classList.remove('hide');
+                clearInterval(expirationTimer);
+            } else {
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                expiredTimeElement.textContent = `${minutes} menit ${seconds} detik`;
+            }
+        }
+
+        // Event Listener untuk tombol buat QRIS
+        createQrisButton.addEventListener('click', createQris);
+
+        // Event Listener untuk tombol buat QRIS lagi
+        createAgainButton.addEventListener('click', function() {
+            // Sembunyikan tombol "Buat QRIS Lagi" dan buat QRIS baru
+            createAgainSection.classList.add('hide');
+            createQris();
+        });
+    </script>
+</body>
+</html>
